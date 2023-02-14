@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Post</title>
+</head>
+
+<body>
+  <div class="header comments-header">
+    <a href="index.html" class="back-link">
+      <span><</span>
+      Back
+    </a>
+    <span class="title">Comments</span>
+  </div>
+  <div class="container comments-container"></div>
+  <script>
+
+    const getData = async (postID) => {
+      const response = await fetch(`https://gorest.co.in/public-api/posts/${postID}`)
+      const data = await response.json();
+      return data;
+    };
+
+    const getComments = async (postID) => {
+      const response = await fetch(`https://gorest.co.in/public-api/comments?post_id=${postID}`);
+      const data = response.json();
+      return data;
+    }
+
+    const render = (obj, content) => {
+        const post = document.createElement('article');
+        post.classList.add('article');
+
+        post.innerHTML = `
+          <h1 class="content-title">${obj.title}</h1>
+          <hr></hr>
+          <p class="content-article">${obj.body}</p>
+        `;
+        content.append(post)
+    };
+
+    const renderComments = (arr, container) => {
+      const block = document.createElement('div');
+      block.classList.add('comments-block');
+
+      arr.forEach(obj => {
+        const users = document.createElement('div');
+        users.classList.add('users');
+        users.innerHTML = `
+            <h2 class="comment-title">Сomment on the post</h2>
+            <span class="comment-name">Name: <span>${obj.name}</span></span>
+            <span class="comment-mail">Email: <span>${obj.email}</span></span>
+            <hr/>
+            <p class="comment-text">Comment: <span>${obj.body}</span></p>
+        `;
+        block.appendChild(users);
+      });
+      container.appendChild(block)
+    }
+
+    const paramsString = window.location.search;
+    const searchParams = new URLSearchParams(paramsString);
+    const container = document.querySelector('.comments-container');
+
+    for (let p of searchParams) {
+      getData(p[1])
+        .then(data => render(data.data, container));
+      getComments(p[1])
+        .then(data => renderComments(data.data, container))
+    };
+
+  </script>
+</body>
+
+</html>
